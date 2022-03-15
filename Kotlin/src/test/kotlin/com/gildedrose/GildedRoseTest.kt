@@ -1,28 +1,19 @@
 package com.gildedrose
 
 import com.gildedrose.kt.ItemBehaviour
+import com.gildedrose.kt.QualityStrategy
 import com.gildedrose.kt.item
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class GildedRoseTest {
 
-//    @Test
-//    fun `test item mapper`() {
-//        val commonItem1 = Item("foo", 10, 30)
-//        with(item(commonItem1)) {
-//            assertEquals(commonItem1.name, name)
-//            assertEquals(commonItem1.sellIn, sellIn)
-//            assertEquals(commonItem1.quality, quality)
-//        }
-//    }
-
     @Test
     fun `should handle COMMON behaviour successfully`() {
-        val commonItem = item("foo", 3, 5) {
+        val item = item("foo", 3, 5) {
             itemBehaviour = ItemBehaviour.COMMON
         }
-        commonItem.apply {
+        item.apply {
             //Run till sell in become 0
             (1..3).map {
                 tick()
@@ -41,10 +32,10 @@ internal class GildedRoseTest {
 
     @Test
     fun `should handle CONJURED behaviour successfully`() {
-        val commonItem = item("foo", 3, 5) {
+        val item = item("foo", 3, 5) {
             itemBehaviour = ItemBehaviour.CONJURED
         }
-        commonItem.apply {
+        item.apply {
             //Run till sell in become 0
             (1..3).map {
                 tick()
@@ -60,6 +51,71 @@ internal class GildedRoseTest {
             }
         }
     }
+
+
+    @Test
+    fun `should handle AGED_BRIE behaviour successfully`() {
+        val item = item("foo", 3, 5) {
+            itemBehaviour = ItemBehaviour.AGED_BRIE
+        }
+
+        item.apply {
+            //Run till sell in become 0
+            (1..3).map {
+                tick()
+                assertEquals(3 - it, sellIn, toString())
+                assertEquals(5 + it, quality, toString())
+            }
+
+            // Test EOL
+            (1..2).map {
+                tick()
+                assertEquals(0 - it, sellIn, toString())
+                assertEquals((8 + (it * 2)), quality, toString())
+            }
+        }
+    }
+
+
+    @Test
+    fun `should handle SULFURAS behaviour successfully with positive sellIn`() {
+        val item = item("foo", 3, 5) {
+            itemBehaviour = ItemBehaviour.SULFURAS
+        }
+
+        repeat(10) {
+            item.tick()
+        }
+        assertEquals(5, item.quality)
+        assertEquals(3, item.sellIn)
+    }
+
+    @Test
+    fun `should handle SULFURAS behaviour successfully with negative sellIn`() {
+        val item = item("foo", -1, 5) {
+            itemBehaviour = ItemBehaviour.SULFURAS
+        }
+
+        repeat(10) {
+            item.tick()
+        }
+        assertEquals(5, item.quality)
+    }
+
+
+    @Test
+    fun `should handle BACKSTAGE_PASSES behaviour successfully`() {
+        val item = item("foo", 12, 50) {
+            itemBehaviour = ItemBehaviour.BACKSTAGE_PASSES
+        }
+        val strategy =
+            (ItemBehaviour.BACKSTAGE_PASSES.qualityStrategy as QualityStrategy.BackstagePasses)
+        repeat(13) {
+            val qualityChangeValue = strategy.valueForItem(item) ?: 0
+            val expectedEquality = item.quality + qualityChangeValue
+            item.tick()
+            assertEquals(expectedEquality, item.quality)
+            assertEquals(12 - it - 1, item.sellIn)
+        }
+    }
 }
-
-
