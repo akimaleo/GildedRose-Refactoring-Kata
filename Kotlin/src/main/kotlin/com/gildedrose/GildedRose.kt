@@ -1,60 +1,78 @@
 package com.gildedrose
 
-import java.util.Collections.max
+import com.gildedrose.kt.ItemModel
+import com.gildedrose.kt.toLegacy
+import com.gildedrose.kt.toRefactored
 
-class GildedRose(var items: Array<Item>) {
+abstract class GildedRose(open val items: Array<Item>) {
+    abstract fun updateQuality()
+    override fun toString() = items.joinToString("") { it.toString() + "\n" }
+}
 
-    fun updateQuality() {
-        items.forEach {
-            if (it.name != "Aged Brie" && it.name != "Backstage passes to a TAFKAL80ETC concert") {
-                if (it.quality > 0) {
-                    if (it.name != "Sulfuras, Hand of Ragnaros") {
-                        it.quality = it.quality - 1
+class GildedRoseLegacy(override val items: Array<Item>) : GildedRose(items) {
+
+    override fun updateQuality() {
+        for (i in items.indices) {
+            if (items[i].name != "Aged Brie" && items[i].name != "Backstage passes to a TAFKAL80ETC concert") {
+                if (items[i].quality > 0) {
+                    if (items[i].name != "Sulfuras, Hand of Ragnaros") {
+                        items[i].quality = items[i].quality - 1
                     }
                 }
             } else {
-                if (it.quality < 50) {
-                    it.quality = it.quality + 1
+                if (items[i].quality < 50) {
+                    items[i].quality = items[i].quality + 1
 
-                    if (it.name == "Backstage passes to a TAFKAL80ETC concert") {
-                        if (it.sellIn < 11) {
-                            if (it.quality < 50) {
-                                it.quality = it.quality + 1
+                    if (items[i].name == "Backstage passes to a TAFKAL80ETC concert") {
+                        if (items[i].sellIn < 11) {
+                            if (items[i].quality < 50) {
+                                items[i].quality = items[i].quality + 1
                             }
                         }
 
-                        if (it.sellIn < 6) {
-                            if (it.quality < 50) {
-                                it.quality = it.quality + 1
+                        if (items[i].sellIn < 6) {
+                            if (items[i].quality < 50) {
+                                items[i].quality = items[i].quality + 1
                             }
                         }
                     }
                 }
             }
 
-            if (it.name != "Sulfuras, Hand of Ragnaros") {
-                it.sellIn = it.sellIn - 1
+            if (items[i].name != "Sulfuras, Hand of Ragnaros") {
+                items[i].sellIn = items[i].sellIn - 1
             }
 
-            if (it.sellIn < 0) {
-                if (it.name != "Aged Brie") {
-                    if (it.name != "Backstage passes to a TAFKAL80ETC concert") {
-                        if (it.quality > 0) {
-                            if (it.name != "Sulfuras, Hand of Ragnaros") {
-                                it.quality = it.quality - 1
+            if (items[i].sellIn < 0) {
+                if (items[i].name != "Aged Brie") {
+                    if (items[i].name != "Backstage passes to a TAFKAL80ETC concert") {
+                        if (items[i].quality > 0) {
+                            if (items[i].name != "Sulfuras, Hand of Ragnaros") {
+                                items[i].quality = items[i].quality - 1
                             }
                         }
                     } else {
-                        it.quality = it.quality - it.quality
+                        items[i].quality = items[i].quality - items[i].quality
                     }
                 } else {
-                    if (it.quality < 50) {
-                        it.quality = it.quality + 1
+                    if (items[i].quality < 50) {
+                        items[i].quality = items[i].quality + 1
                     }
                 }
             }
         }
     }
-
 }
 
+class GildedRoseRefactored(items: Array<Item>) : GildedRose(items) {
+    override val items: Array<Item>
+        get() = model.toLegacy()
+
+    private val model: Array<ItemModel> = items.toRefactored()
+
+    override fun updateQuality() {
+        model.forEach {
+            it.tick()
+        }
+    }
+}

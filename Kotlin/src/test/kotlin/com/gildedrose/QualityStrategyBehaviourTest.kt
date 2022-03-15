@@ -11,7 +11,7 @@ internal class QualityStrategyBehaviourTest {
     @Test
     fun `should handle static quality diminution strategy successfully`() {
         val staticQualityStrategy = static(-1, eolMultiplier(1))
-        val item = Item("foo", 3, 10)
+        val item = item("foo", 3, 10)
         with(item) {
             (1..4).forEach {
                 staticQualityStrategy(this)
@@ -25,7 +25,7 @@ internal class QualityStrategyBehaviourTest {
     fun `should handle static quality amplification strategy successfully`() {
         val initQuality = 10
         val staticQualityStrategy = static(1, eolMultiplier(1))
-        val item = Item("foo", 3, initQuality)
+        val item = item("foo", 3, initQuality)
         with(item) {
             (1..4).forEach {
                 staticQualityStrategy(this)
@@ -39,7 +39,7 @@ internal class QualityStrategyBehaviourTest {
     fun `should handle maximum quality bound successfully`() {
         val initQuality = 48
         val staticQualityStrategy = static(1, eolMultiplier(1))
-        val item = Item("foo", 3, initQuality)
+        val item = item("foo", 3, initQuality)
         with(item) {
             (1..4).forEach {
                 staticQualityStrategy(this)
@@ -53,7 +53,7 @@ internal class QualityStrategyBehaviourTest {
     fun `should handle minimum quality bound successfully`() {
         val initQuality = 1
         val staticQualityStrategy = static(-1, eolMultiplier(1))
-        val item = Item("foo", 3, initQuality)
+        val item = item("foo", 3, initQuality)
         repeat(2) {
             staticQualityStrategy(item)
         }
@@ -65,7 +65,7 @@ internal class QualityStrategyBehaviourTest {
     @Test
     fun `should handle EOL multiplier modificator for properly`() {
         val commonBehaviour = static(-1, eolMultiplier(2))
-        val item = Item("foo", 3, 10)
+        val item = item("foo", 3, 10)
         repeat(5) {
             commonBehaviour(item)
         }
@@ -78,7 +78,7 @@ internal class QualityStrategyBehaviourTest {
     @Test
     fun `should handle EOL eolJump modificator properly`() {
         val commonBehaviour = static(-1, eolJump(10))
-        val item = Item("foo", 1, 10)
+        val item = item("foo", 1, 10)
         repeat(2) {
             commonBehaviour(item)
         }
@@ -91,7 +91,7 @@ internal class QualityStrategyBehaviourTest {
     @Test
     fun `should handle EOL eolEmpty modificator properly`() {
         val commonBehaviour = static(-1, eolEmpty())
-        val item = Item("foo", 0, 10)
+        val item = item("foo", 0, 10)
         commonBehaviour(item)
         with(item) {
             assertEquals(-1, sellIn)

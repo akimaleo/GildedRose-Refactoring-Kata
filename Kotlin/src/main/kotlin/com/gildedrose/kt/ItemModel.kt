@@ -6,25 +6,25 @@ import kotlin.run
 
 sealed class EndOfLifeModificator {
     class QualityMultiplier(val num: Int) : EndOfLifeModificator() {
-        operator fun invoke(item: Item, originalNum: Int) {
+        operator fun invoke(item: ItemModel, originalNum: Int) {
             item.quality = validateQuality(item.quality + originalNum * num)
         }
     }
 
     class Jump(val num: Int) : EndOfLifeModificator() {
-        operator fun invoke(item: Item) {
+        operator fun invoke(item: ItemModel) {
             item.quality = num
         }
     }
 
     object Empty : EndOfLifeModificator() {
-        operator fun invoke(item: Item, originalNum: Int) {
+        operator fun invoke(item: ItemModel, originalNum: Int) {
             item.quality = validateQuality(item.quality + originalNum)
         }
     }
 
     companion object {
-        fun EndOfLifeModificator.apply(item: Item, originalNum: Int) {
+        fun EndOfLifeModificator.apply(item: ItemModel, originalNum: Int) {
             when (this) {
                 is QualityMultiplier -> {
                     invoke(item, originalNum)
@@ -44,30 +44,34 @@ sealed class QualityStrategy(
     var max: Int = QUALITY_MAX,
 ) {
 
-    operator fun invoke(item: Item) {
+    operator fun invoke(item: ItemModel) {
         when {
             item.sellIn > 0 -> onTick(item)
             else -> onAfterlife(item)
         }
-        item.sellIn--
     }
 
-    abstract fun onTick(item: Item)
+    abstract fun onTick(item: ItemModel)
 
-    abstract fun onAfterlife(item: Item)
+    abstract fun onAfterlife(item: ItemModel)
 
     class Static(
         val num: Int? = null,
+        val decreaseSellIn: Boolean = true,
         endOfLifeModificator: EndOfLifeModificator,
         max: Int,
         min: Int
     ) : QualityStrategy(endOfLifeModificator, max, min) {
-        override fun onTick(item: Item) {
-            num?.let { item.quality = validateQuality(item.quality + it) }
+        override fun onTick(item: ItemModel) {
+            with(item) {
+                num?.let { quality = validateQuality(quality + it) }
+                if (decreaseSellIn) sellIn--
+            }
         }
 
-        override fun onAfterlife(item: Item) {
+        override fun onAfterlife(item: ItemModel) {
             num?.let { endOfLifeModificator.apply(item, num) }
+            if (decreaseSellIn) item.sellIn--
         }
     }
 
@@ -77,19 +81,21 @@ sealed class QualityStrategy(
         max: Int,
         min: Int
     ) : QualityStrategy(endOfLifeModificator, max, min) {
-        override fun onTick(item: Item) {
+        override fun onTick(item: ItemModel) {
             findNum(item)?.let {
-                item.quality += it
+                item.quality = validateQuality(item.quality + it)
             } ?: print("Not in the range")
+            item.sellIn--
         }
 
-        override fun onAfterlife(item: Item) {
+        override fun onAfterlife(item: ItemModel) {
             findNum(item)?.let { num ->
                 endOfLifeModificator.apply(item, num)
             } ?: print("Not in the range")
+            item.sellIn--
         }
 
-        private fun findNum(item: Item) = values
+        private fun findNum(item: ItemModel) = values
             .filter { it.key.contains(item.sellIn) }
             .map { it.value }
             .maxByOrNull { it }
@@ -113,18 +119,20 @@ enum class ItemBehaviour(val qualityStrategy: QualityStrategy) {
         )
     );
 
-    operator fun invoke(item: Item) = qualityStrategy(item)
+    operator fun invoke(item: ItemModel) = qualityStrategy(item)
 
 }
 
 class ItemModel(
-    override var name: String,
-    override var sellIn: Int,
-    override var quality: Int
-) : Item(name, sellIn, quality) {
+    var name: String,
+    var sellIn: Int,
+    var quality: Int
+) {
     var itemBehaviour: ItemBehaviour = getTypeOfName(name)
 
     fun tick() {
         itemBehaviour(this)
     }
+
+    override fun toString() = "[" + this.name + ", " + this.sellIn + ", " + this.quality + "]"
 }
