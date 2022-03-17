@@ -7,6 +7,21 @@ import com.gildedrose.kt.toRefactored
 abstract class GildedRose(open val items: Array<Item>) {
     abstract fun updateQuality()
     override fun toString() = items.joinToString("") { it.toString() + "\n" }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GildedRose) return false
+
+        if (!items.contentEquals(other.items)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return items.contentHashCode()
+    }
+
+
 }
 
 class GildedRoseLegacy(override val items: Array<Item>) : GildedRose(items) {

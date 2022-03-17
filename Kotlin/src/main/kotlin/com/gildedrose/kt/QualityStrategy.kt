@@ -47,7 +47,7 @@ sealed class QualityStrategy(
     ) : QualityStrategy(endOfLifeModificator, max, min) {
         override fun onTick(item: ItemModel) {
             valueForItem(item)?.let {
-                item.quality = validateQuality(item.quality + it)
+                item.quality = validateQuality(item.quality - it)
             } ?: print("Not in the range")
             item.sellIn--
         }
