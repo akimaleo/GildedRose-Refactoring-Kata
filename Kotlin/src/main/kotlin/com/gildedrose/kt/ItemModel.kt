@@ -8,8 +8,8 @@ enum class ItemBehaviour(val qualityStrategy: QualityStrategy) {
     BACKSTAGE_PASSES(
         backstagePasses(
             mapOf(
-                (10..Int.MAX_VALUE) to -1,
-                (5..10) to -2,
+                (11..Int.MAX_VALUE) to -1,
+                (6..10) to -2,
                 (1..5) to -3
             ),
             eolJump(0)

@@ -23,7 +23,6 @@ class EnfOfLifeModificatorTest {
         Assertions.assertEquals(10, item.quality)
     }
 
-
     @Test
     fun `should handle value inn common way when EOL Empty modificator was applied`() {
         val commonBehaviour = static(-1, eolJump(10))

@@ -1,8 +1,8 @@
 package com.gildedrose
 
-import jdk.nashorn.internal.ir.annotations.Ignore
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class GildedRoseTest {
@@ -19,19 +19,20 @@ class GildedRoseTest {
             }
     }
 
-    /**
-     * My assumption is legacy implementation of the GildedRose is incorrect
-     */
+    @Disabled("My assumption is that legacy implementation of the GildedRose is incorrect")
     @Test
-    @Ignore
     fun `test refactored GildedRose implementation behaviour is correct comparing with gildedRoseRefactored`() {
         repeat(10) {
+            if (it == 5) {
+                println()
+            }
             gildedRoseLegacy.updateQuality()
             gildedRoseRefactored.updateQuality()
 
             assertEquals(
                 gildedRoseLegacy,
-                gildedRoseRefactored
+                gildedRoseRefactored,
+                "Attempt: ${it + 1}"
             )
         }
     }
