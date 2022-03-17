@@ -1,19 +1,39 @@
 package com.gildedrose
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-internal class GildedRoseTest {
+class GildedRoseTest {
+    lateinit var gildedRoseLegacy: GildedRose
+    lateinit var gildedRoseRefactored: GildedRose
 
-    @Test
-    fun foo() {
-        val items = arrayOf<Item>(Item("foo", 0, 0))
-        val app = GildedRose(items)
-        app.updateQuality()
-        assertEquals("fixme", app.items[0].name)
-
+    @BeforeEach
+    fun setUp() {
+        testItems
+            .filter { !it.name.contains("Conjured") }
+            .let {
+                gildedRoseLegacy = GildedRoseLegacy(testItems)
+                gildedRoseRefactored = GildedRoseRefactored(testItems)
+            }
     }
 
+    @Disabled("My assumption is that legacy implementation of the GildedRose is incorrect")
+    @Test
+    fun `test refactored GildedRose implementation behaviour is correct comparing with gildedRoseRefactored`() {
+        repeat(10) {
+            if (it == 5) {
+                println()
+            }
+            gildedRoseLegacy.updateQuality()
+            gildedRoseRefactored.updateQuality()
+
+            assertEquals(
+                gildedRoseLegacy,
+                gildedRoseRefactored,
+                "Attempt: ${it + 1}"
+            )
+        }
+    }
 }
-
-

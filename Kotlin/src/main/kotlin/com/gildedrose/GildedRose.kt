@@ -1,8 +1,32 @@
 package com.gildedrose
 
-class GildedRose(var items: Array<Item>) {
+import com.gildedrose.kt.ItemModel
+import com.gildedrose.kt.toLegacy
+import com.gildedrose.kt.toRefactored
 
-    fun updateQuality() {
+abstract class GildedRose(open val items: Array<Item>) {
+    abstract fun updateQuality()
+    override fun toString() = items.joinToString("") { it.toString() + "\n" }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is GildedRose) return false
+
+        if (!items.contentEquals(other.items)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return items.contentHashCode()
+    }
+
+
+}
+
+class GildedRoseLegacy(override val items: Array<Item>) : GildedRose(items) {
+
+    override fun updateQuality() {
         for (i in items.indices) {
             if (items[i].name != "Aged Brie" && items[i].name != "Backstage passes to a TAFKAL80ETC concert") {
                 if (items[i].quality > 0) {
@@ -53,6 +77,17 @@ class GildedRose(var items: Array<Item>) {
             }
         }
     }
-
 }
 
+class GildedRoseRefactored(items: Array<Item>) : GildedRose(items) {
+    override val items: Array<Item>
+        get() = model.toLegacy()
+
+    private val model: Array<ItemModel> = items.toRefactored()
+
+    override fun updateQuality() {
+        model.forEach {
+            it.tick()
+        }
+    }
+}
